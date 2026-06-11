@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Folders</title>
+</head>
+<body bgcolor="#A0B8C8" text="#000000" link="#000000" vlink="#000000" alink="#000000">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td align="center">
+  <font size="3"><b>Folders</b></font><br>
+  <font size="1">Last refresh:<br>{{.Time}}</font><br>
+  <font size="2">(<a href="/left">refresh folder list</a>)</font>
+</td></tr>
+</table>
+<br>
+<font size="2">
+{{range .Folders}}
+{{indent .Indent}}{{if .Selected}}<b>{{end}}<a href="/right?folder={{.Name | urlquery}}" target="right">{{.Display}}</a>{{if gt .Unseen 0}}&nbsp;<b>({{.Unseen}})</b>{{end}}{{if .Selected}}</b>{{end}}<br>
+{{end}}
+</font>
+<br>
+<hr noshade size="1">
+<font size="2">
+<a href="/compose" target="right">Compose</a><br>
+<a href="/folders" target="right">Manage&nbsp;folders</a><br>
+<a href="/logout" target="_top">Sign&nbsp;Out</a>
+</font>
+</body>
+</html>

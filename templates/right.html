@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>{{.Org}} - {{.Folder}}</title>
+</head>
+<body bgcolor="#FFFFFF" text="#000000" link="#0000CC" vlink="#0000CC" alink="#0000CC">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+<tr bgcolor="#DCDCDC">
+  <td align="left"><font size="2"><b>Current Folder: {{.Folder}}</b></font></td>
+  <td align="right"><font size="2"><a href="/logout" target="_top"><b>Sign Out</b></a></font></td>
+</tr>
+<tr bgcolor="#FFFFFF">
+  <td align="left" colspan="2"><font size="2">
+    <a href="/compose?folder={{.Folder | urlquery}}">Compose</a>&nbsp;&nbsp;
+    <a href="/folders">Folders</a>&nbsp;&nbsp;
+    <a href="/right?folder={{.Folder | urlquery}}&page={{.Page}}">Refresh</a>
+  </font></td>
+</tr>
+</table>
+
+{{if .Note}}
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+<tr><td align="center" bgcolor="#FFFFCC"><font size="2" color="#800000"><b>{{.Note}}</b></font></td></tr>
+</table>
+{{end}}
+
+<form action="/action" method="post">
+<input type="hidden" name="token" value="{{.Token}}">
+<input type="hidden" name="folder" value="{{.Folder}}">
+<input type="hidden" name="page" value="{{.Page}}">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+<tr bgcolor="#ABABAB">
+  <td align="left"><font size="2">
+    Move selected to:
+    <select name="target">
+    {{range .Folders}}<option value="{{.Name}}">{{.Name}}</option>
+    {{end}}</select>
+    <input type="submit" name="do" value="Move">
+  </font></td>
+  <td align="right"><font size="2">
+    <input type="submit" name="do" value="Read">
+    <input type="submit" name="do" value="Unread">
+    <input type="submit" name="do" value="Delete">
+  </font></td>
+</tr>
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td bgcolor="#000000">
+<table width="100%" border="0" cellspacing="1" cellpadding="2">
+<tr bgcolor="#FFFFCC">
+  <td width="1%" align="center"><font size="2"><b>&nbsp;</b></font></td>
+  <td width="30%" align="left"><font size="2"><b>From</b></font></td>
+  <td width="15%" align="left"><font size="2"><b>Date</b></font></td>
+  <td align="left"><font size="2"><b>Subject</b></font></td>
+  <td width="8%" align="right"><font size="2"><b>Size</b></font></td>
+</tr>
+{{$top := .}}
+{{range $i, $m := .Msgs}}
+<tr bgcolor="{{if even $i}}#FFFFFF{{else}}#EDEDED{{end}}">
+  <td align="center"><input type="checkbox" name="msg" value="{{$m.UID}}"></td>
+  <td><font size="2">{{if not $m.Seen}}<b>{{end}}{{$m.From}}{{if not $m.Seen}}</b>{{end}}</font></td>
+  <td nowrap><font size="2">{{if not $m.Seen}}<b>{{end}}{{$m.Date}}{{if not $m.Seen}}</b>{{end}}</font></td>
+  <td><font size="2">{{if not $m.Seen}}<b>{{end}}<a href="/read?folder={{$top.Folder | urlquery}}&uid={{$m.UID}}&page={{$top.Page}}">{{$m.Subject}}</a>{{if not $m.Seen}}</b>{{end}}{{if $m.Answer}}&nbsp;<font size="1" color="#666666">(replied)</font>{{end}}{{if $m.Flagged}}&nbsp;<font size="1" color="#CC0000">(!)</font>{{end}}</font></td>
+  <td align="right" nowrap><font size="2">{{humanSize $m.Size}}</font></td>
+</tr>
+{{else}}
+<tr bgcolor="#FFFFFF">
+  <td colspan="5" align="center"><br><font size="2"><b>THIS FOLDER IS EMPTY</b></font><br><br></td>
+</tr>
+{{end}}
+</table>
+</td></tr>
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+<tr bgcolor="#ABABAB">
+  <td align="left"><font size="2">
+    {{if .HasPrev}}<a href="/right?folder={{.Folder | urlquery}}&page={{sub .Page 1}}"><b>Previous</b></a>{{else}}Previous{{end}}
+    |
+    {{if .HasNext}}<a href="/right?folder={{.Folder | urlquery}}&page={{add .Page 1}}"><b>Next</b></a>{{else}}Next{{end}}
+  </font></td>
+  <td align="right"><font size="2">Viewing messages <b>{{.FirstNum}}</b> to <b>{{.LastNum}}</b> ({{.Total}} total)</font></td>
+</tr>
+</table>
+</form>
+
+</body>
+</html>

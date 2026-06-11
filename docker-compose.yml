@@ -1,0 +1,34 @@
+# GreenMail test mail server for MunkMail development.
+#
+# Start:  docker compose up -d greenmail
+# Seed:   go run ./cmd/seed
+# Run:    make dev   (MunkMail on http://localhost:8000)
+#
+# Test accounts (login / password):
+#   munk / acorns   (munk@example.org)
+#   jane / secret   (jane@example.org)
+
+services:
+  greenmail:
+    image: greenmail/standalone:2.1.3
+    container_name: munkmail-greenmail
+    environment:
+      - GREENMAIL_OPTS=-Dgreenmail.setup.test.smtp
+        -Dgreenmail.setup.test.imap
+        -Dgreenmail.setup.test.smtps
+        -Dgreenmail.setup.test.imaps
+        -Dgreenmail.hostname=0.0.0.0
+        -Dgreenmail.users=munk:acorns@example.org,jane:secret@example.org
+        -Dgreenmail.verbose
+    ports:
+      - "3025:3025"   # SMTP
+      - "3143:3143"   # IMAP
+      - "3465:3465"   # SMTPS (self-signed)
+      - "3993:3993"   # IMAPS (self-signed)
+      - "8080:8080"   # GreenMail REST API
+    healthcheck:
+      # The image has no wget/curl; probe the IMAP port with bash.
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/3143 && </dev/tcp/localhost/3025"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
