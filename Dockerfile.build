@@ -37,7 +37,7 @@ RUN mkdir -p /out && \
     --architecture amd64 \
     --depends "adduser" \
     --description "SquirrelMail-style webmail client written in Go" \
-    --url "https://github.com/ryan/munkmail" \
+    --url "https://github.com/rdoy-lab/munkmail" \
     --license "MIT" \
     --maintainer "Ryan <ryan@example.com>" \
     --before-install /tmp/preinst \
