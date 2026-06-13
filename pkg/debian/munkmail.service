@@ -34,7 +34,7 @@ RestartSec=5
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
-ReadWritePaths=/var/lib/munkmail
+StateDirectory=munkmail
 
 [Install]
 WantedBy=multi-user.target
