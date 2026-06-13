@@ -1,0 +1,40 @@
+[Unit]
+Description=MunkMail webmail client
+Documentation=https://github.com/ryan/munkmail
+After=network.target
+
+[Service]
+Type=simple
+User=munkmail
+Group=munkmail
+
+# Defaults (overridden by /etc/default/munkmail).
+Environment=MUNKMAIL_LISTEN=:8000
+Environment=MUNKMAIL_IMAP=localhost:143
+Environment=MUNKMAIL_IMAP_SECURITY=starttls
+Environment=MUNKMAIL_SMTP=localhost:25
+Environment=MUNKMAIL_SMTP_SECURITY=starttls
+Environment=MUNKMAIL_DOMAIN=localhost
+Environment=MUNKMAIL_ORG=MunkMail
+
+# Pull in user overrides; the dash means "don't fail if missing".
+EnvironmentFile=-/etc/default/munkmail
+
+ExecStart=/usr/bin/munkmail \
+    -listen ${MUNKMAIL_LISTEN} \
+    -imap ${MUNKMAIL_IMAP} \
+    -imap-security ${MUNKMAIL_IMAP_SECURITY} \
+    -smtp ${MUNKMAIL_SMTP} \
+    -smtp-security ${MUNKMAIL_SMTP_SECURITY} \
+    -domain ${MUNKMAIL_DOMAIN} \
+    -org ${MUNKMAIL_ORG}
+
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/munkmail
+
+[Install]
+WantedBy=multi-user.target

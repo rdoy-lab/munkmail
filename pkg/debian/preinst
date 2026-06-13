@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+# Create a dedicated system user for munkmail if it doesn't exist.
+if ! getent passwd munkmail >/dev/null; then
+    adduser --system --group --home /var/lib/munkmail --no-create-home \
+        --gecos "MunkMail webmail" munkmail
+fi

@@ -1,0 +1,20 @@
+# /etc/default/munkmail — Environment variables for the MunkMail service.
+# Uncomment and edit the values you need, then restart the service:
+#   systemctl restart munkmail
+
+# HTTP listen address.
+# MUNKMAIL_LISTEN=:8000
+
+# IMAP server (host:port) and security mode (tls, starttls, insecure).
+# MUNKMAIL_IMAP=localhost:143
+# MUNKMAIL_IMAP_SECURITY=starttls
+
+# SMTP server (host:port) and security mode (tls, starttls, insecure).
+# MUNKMAIL_SMTP=localhost:25
+# MUNKMAIL_SMTP_SECURITY=starttls
+
+# Mail domain appended to bare logins for the From: address.
+# MUNKMAIL_DOMAIN=localhost
+
+# Organisation name shown in page titles.
+# MUNKMAIL_ORG=MunkMail

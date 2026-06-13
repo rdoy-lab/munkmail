@@ -1,0 +1,53 @@
+# Multi-stage Dockerfile that produces a Debian package (.deb).
+#
+# Build:  make deb
+# The .deb lands in dist/.
+
+# ── Stage 1: compile Go binary ────────────────────────────────────────
+FROM golang:1.24-bookworm AS build
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -ldflags="-s -w" -o /munkmail .
+
+# ── Stage 2: build .deb with fpm ─────────────────────────────────────
+FROM ruby:3.3-slim AS package
+
+RUN apt-get update && apt-get install -y --no-install-recommends binutils && rm -rf /var/lib/apt/lists/*
+RUN gem install --no-document fpm
+
+# Copy the compiled binary from stage 1.
+COPY --from=build /munkmail /usr/local/bin/munkmail
+
+# Copy packaging assets.
+COPY pkg/debian/preinst /tmp/preinst
+COPY pkg/debian/munkmail.service /tmp/munkmail.service
+COPY pkg/debian/munkmail.default /tmp/munkmail.default
+
+# Read version from build arg (set via Makefile).
+ARG VERSION=0.0.0
+
+RUN mkdir -p /out && \
+    fpm -s dir -t deb \
+    --name munkmail \
+    --version "${VERSION}" \
+    --architecture amd64 \
+    --depends "adduser" \
+    --description "SquirrelMail-style webmail client written in Go" \
+    --url "https://github.com/ryan/munkmail" \
+    --license "MIT" \
+    --maintainer "Ryan <ryan@example.com>" \
+    --before-install /tmp/preinst \
+    --config-files /etc/default/munkmail \
+    --deb-systemd /tmp/munkmail.service \
+    --deb-default /tmp/munkmail.default \
+    --package /out/munkmail_${VERSION}_amd64.deb \
+    /usr/local/bin/munkmail=/usr/bin/munkmail
+
+# ── Stage 3: small image that just holds the .deb ─────────────────────
+FROM debian:bookworm-slim AS artifact
+COPY --from=package /out/ /out/
+CMD ["/bin/ls", "-lh", "/out/"]

@@ -1,9 +1,10 @@
 # MunkMail development helpers.
 
+MAJOR ?= 0
 GREENMAIL_IMAP = localhost:3143
 GREENMAIL_SMTP = localhost:3025
 
-.PHONY: build test greenmail greenmail-down seed dev test-integration
+.PHONY: build test greenmail greenmail-down seed dev test-integration deb
 
 build:
 	go build ./...
@@ -32,3 +33,15 @@ dev:
 # Integration tests against a running GreenMail (skipped when it is down).
 test-integration: greenmail
 	go test -run TestGreenMail -v ./...
+
+# Build a Debian package inside Docker.  Output lands in dist/.
+# Set MAJOR on the command line: make deb MAJOR=2
+deb: VERSION = $(MAJOR).$(shell git rev-list --count HEAD)+sha.$(shell git rev-parse --short HEAD)
+deb:
+	@mkdir -p dist
+	@echo "Building munkmail $(VERSION)"
+	docker build -f Dockerfile.build --build-arg VERSION=$(VERSION) --target artifact -t munkmail-deb . ; \
+	CID=$$(docker create munkmail-deb); \
+	docker cp $$CID:/out/. dist/ ; \
+	docker rm $$CID ; \
+	ls -lh dist/*.deb
