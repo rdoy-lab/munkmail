@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    bracnhes:
+    branches:
       - main
 
 permissions:
@@ -16,11 +16,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Compute version
+        run: |
+          MAJOR=${MAJOR:-0}
+          COUNT=$(git rev-list --count HEAD)
+          SHA=$(git rev-parse --short HEAD)
+          echo "VERSION=$MAJOR.$COUNT+sha.$SHA" >> $GITHUB_ENV
+
       - name: Build deb package
         run: make deb
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
           files: dist/*.deb
           generate_release_notes: true
