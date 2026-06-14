@@ -14,8 +14,6 @@ import (
 	"github.com/emersion/go-imap/v2"
 )
 
-const perPage = 15
-
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -111,6 +109,17 @@ func handleRight(w http.ResponseWriter, r *http.Request, s *Session) {
 	if page < 1 {
 		page = 1
 	}
+	perPage := s.PerPage
+	if perPage == 0 {
+		perPage = defaultPerPage
+	}
+	if pp := r.FormValue("per_page"); pp != "" {
+		if n, err := strconv.Atoi(pp); err == nil && (n == 10 || n == 20 || n == 50) {
+			perPage = n
+			s.PerPage = n
+			page = 1
+		}
+	}
 	backURL := "/right?folder=" + url.QueryEscape(folder)
 
 	c, err := dialIMAP(s.User, s.Password)
@@ -137,6 +146,7 @@ func handleRight(w http.ResponseWriter, r *http.Request, s *Session) {
 		"Org":      config.OrgName,
 		"Folder":   folder,
 		"Page":     page,
+		"PerPage":  perPage,
 		"Msgs":     msgs,
 		"Total":    total,
 		"Folders":  folders,

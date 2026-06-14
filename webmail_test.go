@@ -77,7 +77,7 @@ func startTestIMAP(t *testing.T) (string, *imapmemserver.User) {
 	if err := user.Create("INBOX", nil); err != nil {
 		t.Fatal(err)
 	}
-	for i := 1; i <= 20; i++ {
+	for i := 1; i <= 25; i++ {
 		msg := fmt.Sprintf("From: Sender Sciurus <sender%d@example.org>\r\n"+
 			"To: munk@example.org\r\n"+
 			"Subject: Acorn report %d\r\n"+
@@ -232,19 +232,24 @@ func TestFolderAndMessageList(t *testing.T) {
 	}
 
 	right := get(t, client, base+"/right?folder=INBOX")
-	if !strings.Contains(right, "Acorn report 20") {
+	if !strings.Contains(right, "Acorn report 25") {
 		t.Fatalf("newest message not on page 1:\n%s", right)
 	}
 	if strings.Contains(right, "Acorn report 5<") {
 		t.Fatal("old message unexpectedly on page 1")
 	}
-	if !strings.Contains(right, "Viewing messages <b>1</b> to <b>15</b> (20 total)") {
+	if !strings.Contains(right, "Viewing messages <b>1</b> to <b>20</b> (25 total)") {
 		t.Fatalf("pagination summary wrong:\n%s", right)
 	}
 
 	right2 := get(t, client, base+"/right?folder=INBOX&page=2")
 	if !strings.Contains(right2, "Acorn report 5") || !strings.Contains(right2, "Acorn report 1") {
 		t.Fatalf("page 2 missing old messages:\n%s", right2)
+	}
+
+	right10 := get(t, client, base+"/right?folder=INBOX&per_page=10")
+	if !strings.Contains(right10, "Viewing messages <b>1</b> to <b>10</b> (25 total)") {
+		t.Fatalf("per_page=10 summary wrong:\n%s", right10)
 	}
 }
 
@@ -354,14 +359,14 @@ func TestUnreadCountsAndFlags(t *testing.T) {
 	login(t, client, base)
 
 	left := get(t, client, base+"/left")
-	if !strings.Contains(left, "(20)") {
-		t.Fatalf("expected 20 unseen in folder list:\n%s", left)
+	if !strings.Contains(left, "(25)") {
+		t.Fatalf("expected 25 unseen in folder list:\n%s", left)
 	}
 	// Reading a message marks it seen.
 	get(t, client, base+"/read?folder=INBOX&uid=20")
 	left = get(t, client, base+"/left")
-	if !strings.Contains(left, "(19)") {
-		t.Fatalf("expected 19 unseen after reading:\n%s", left)
+	if !strings.Contains(left, "(24)") {
+		t.Fatalf("expected 24 unseen after reading:\n%s", left)
 	}
 	// Mark it unread again via the toolbar action.
 	resp, err := client.PostForm(base+"/action", url.Values{
@@ -373,8 +378,8 @@ func TestUnreadCountsAndFlags(t *testing.T) {
 	}
 	resp.Body.Close()
 	left = get(t, client, base+"/left")
-	if !strings.Contains(left, "(20)") {
-		t.Fatalf("expected 20 unseen after marking unread:\n%s", left)
+	if !strings.Contains(left, "(25)") {
+		t.Fatalf("expected 25 unseen after marking unread:\n%s", left)
 	}
 }
 
@@ -525,8 +530,8 @@ func TestXSSEscaped(t *testing.T) {
 
 	for _, page := range []string{
 		get(t, client, base+"/right?folder=INBOX"),
-		get(t, client, base+"/read?folder=INBOX&uid=21"),
-		get(t, client, base+"/compose?folder=INBOX&uid=21&mode=reply"),
+		get(t, client, base+"/read?folder=INBOX&uid=26"),
+		get(t, client, base+"/compose?folder=INBOX&uid=26&mode=reply"),
 	} {
 		if strings.Contains(page, "<script>alert(") || strings.Contains(page, "<img src=x") {
 			t.Fatalf("unescaped hostile markup in page:\n%.1500s", page)
