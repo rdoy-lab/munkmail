@@ -22,10 +22,7 @@ type Session struct {
 	CSRF     string // per-session anti-CSRF token
 	Created  time.Time
 	LastSeen time.Time
-	PerPage  int // messages per page
 }
-
-const defaultPerPage = 20
 
 var (
 	sessionsMu sync.Mutex
@@ -46,7 +43,7 @@ func createSession(user, password string) string {
 	sessionsMu.Lock()
 	sessions[id] = &Session{
 		User: user, Password: password, CSRF: newSessionID(),
-		Created: now, LastSeen: now, PerPage: defaultPerPage,
+		Created: now, LastSeen: now,
 	}
 	sessionsMu.Unlock()
 	return id

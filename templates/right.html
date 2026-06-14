@@ -81,16 +81,6 @@
     {{if .HasPrev}}<a href="/right?folder={{.Folder | urlquery}}&page={{sub .Page 1}}"><b>Previous</b></a>{{else}}Previous{{end}}
     |
     {{if .HasNext}}<a href="/right?folder={{.Folder | urlquery}}&page={{add .Page 1}}"><b>Next</b></a>{{else}}Next{{end}}
-    &nbsp;&nbsp;
-    <form action="/right" method="get" style="display:inline">
-      <input type="hidden" name="folder" value="{{.Folder}}">
-      <select name="per_page">
-        <option value="10"{{if eq .PerPage 10}} selected{{end}}>10</option>
-        <option value="20"{{if eq .PerPage 20}} selected{{end}}>20</option>
-        <option value="50"{{if eq .PerPage 50}} selected{{end}}>50</option>
-      </select>
-      <input type="submit" value="View">
-    </form>
   </font></td>
   <td align="right"><font size="2">Viewing messages <b>{{.FirstNum}}</b> to <b>{{.LastNum}}</b> ({{.Total}} total)</font></td>
 </tr>
