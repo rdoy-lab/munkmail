@@ -446,6 +446,38 @@ func handleDownload(w http.ResponseWriter, r *http.Request, s *Session) {
 	w.Write(body)
 }
 
+func handleRaw(w http.ResponseWriter, r *http.Request, s *Session) {
+	folder := r.FormValue("folder")
+	page := r.FormValue("page")
+	uid, err := parseUID(r.FormValue("uid"))
+	backURL := "/right?folder=" + url.QueryEscape(folder) + "&page=" + url.QueryEscape(page)
+	if folder == "" || err != nil {
+		renderError(w, backURL, "Bad message reference.")
+		return
+	}
+
+	c, err := dialIMAP(s.User, s.Password)
+	if err != nil {
+		renderError(w, backURL, err.Error())
+		return
+	}
+	defer c.Close()
+
+	raw, _, err := fetchRawMessage(c, folder, uid, false)
+	if err != nil {
+		renderError(w, backURL, fmt.Sprintf("Could not fetch message: %v", err))
+		return
+	}
+
+	render(w, "raw.html", map[string]interface{}{
+		"Org":     config.OrgName,
+		"Folder":  folder,
+		"Page":    pageOr1(page),
+		"UID":     uint32(uid),
+		"RawBody": string(raw),
+	})
+}
+
 func handleFolders(w http.ResponseWriter, r *http.Request, s *Session) {
 	c, err := dialIMAP(s.User, s.Password)
 	if err != nil {

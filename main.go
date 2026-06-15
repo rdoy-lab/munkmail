@@ -52,6 +52,7 @@ func newMux() http.Handler {
 	mux.HandleFunc("/send", requireAuth(handleSend))
 	mux.HandleFunc("/action", requireAuth(handleAction))
 	mux.HandleFunc("/download", requireAuth(handleDownload))
+	mux.HandleFunc("/raw", requireAuth(handleRaw))
 	mux.HandleFunc("/folders", requireAuth(handleFolders))
 	return securityHeaders(mux)
 }
